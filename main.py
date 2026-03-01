@@ -35,6 +35,15 @@ st.set_page_config(
     layout="wide"
 )
 
+# Add SimpleIcons CSS
+st.markdown("""
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons.css">
+<style>
+    .si { width: 1em; height: 1em; vertical-align: -0.125em; }
+    .metric-icon { display: inline-block; margin-right: 8px; }
+</style>
+""", unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────
 # STARTUP VALIDATION
 # ─────────────────────────────────────────────
@@ -75,11 +84,11 @@ if "traces" not in st.session_state:
 # ─────────────────────────────────────────────
 
 with st.sidebar:
-    st.title("📊 BI Agent")
+    st.markdown("### <i class='si si-chartdotjs'></i> BI Agent", unsafe_allow_html=True)
     st.caption("Powered by Monday.com + Groq AI")
     st.divider()
 
-    st.markdown("### 💡 Sample Questions")
+    st.markdown("### <i class='si si-lightbulb'></i> Sample Questions", unsafe_allow_html=True)
     st.markdown("**🔵 Deals Questions (Auto-generates dashboards):**")
     deals_questions = [
         "How is our pipeline looking this quarter?",
@@ -120,7 +129,7 @@ with st.sidebar:
         st.rerun()
 
     st.divider()
-    st.markdown("### 📈 Auto-Generated Visualizations")
+    st.markdown("### <i class='si si-googlecharts'></i> Auto-Generated Visualizations", unsafe_allow_html=True)
     st.caption("• **Deals**: Metrics, Status Charts, Sector Analysis, Funnel, Top Deals")
     st.caption("• **Work Orders**: Metrics, Execution Status, Invoice Analysis, AR Priority")
     st.caption("• **Cross-Board**: Complete analytics dashboard")
@@ -134,7 +143,7 @@ with st.sidebar:
 # HEADER
 # ─────────────────────────────────────────────
 
-st.title("📊 Monday.com Business Intelligence Agent")
+st.markdown("# <i class='si si-monday'></i> Monday.com Business Intelligence Agent", unsafe_allow_html=True)
 st.caption(
     "Ask founder-level business questions. "
     "Every response fetches live data from Monday.com. "
@@ -198,7 +207,7 @@ def create_deals_visualizations(data_dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("🍩 Deal Status Distribution")
+        st.markdown("#### <i class='si si-chartdotjs'></i> Deal Status Distribution", unsafe_allow_html=True)
         if status_counts:
             fig = px.pie(values=list(status_counts.values()), names=list(status_counts.keys()),
                         hole=0.4, title="Deal Status")
@@ -208,7 +217,7 @@ def create_deals_visualizations(data_dict):
             st.info("Status data not available")
     
     with col2:
-        st.subheader("📊 Deals by Sector")
+        st.markdown("#### <i class='si si-googlecharts'></i> Deals by Sector", unsafe_allow_html=True)
         sector_data = summary.get('by_sector', {})
         if sector_data:
             sectors = list(sector_data.keys())
@@ -223,7 +232,7 @@ def create_deals_visualizations(data_dict):
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.subheader("🔻 Deal Stage Funnel")
+        st.markdown("#### <i class='si si-funnel'></i> Deal Stage Funnel", unsafe_allow_html=True)
         stage_data = summary.get('by_stage', {})
         if stage_data:
             stages = list(stage_data.keys())
@@ -239,7 +248,7 @@ def create_deals_visualizations(data_dict):
             st.info("Stage data not available")
     
     with col2:
-        st.subheader("📋 Sample Deals")
+        st.markdown("#### <i class='si si-databricks'></i> Sample Deals", unsafe_allow_html=True)
         if deals_list:
             # Create DataFrame from sample deals
             deals_df = pd.DataFrame(deals_list)
@@ -303,7 +312,7 @@ def create_work_orders_visualizations(data_dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("🍩 Execution Status")
+        st.markdown("#### <i class='si si-chartdotjs'></i> Execution Status", unsafe_allow_html=True)
         exec_status = summary.get('by_execution_status', {})
         if exec_status:
             fig = px.pie(values=list(exec_status.values()), names=list(exec_status.keys()),
@@ -314,7 +323,7 @@ def create_work_orders_visualizations(data_dict):
             st.info("Execution status data not available")
     
     with col2:
-        st.subheader("📊 Invoice Status")
+        st.markdown("#### <i class='si si-googlecharts'></i> Invoice Status", unsafe_allow_html=True)
         invoice_status = summary.get('by_invoice_status', {})
         if invoice_status:
             fig = px.bar(x=list(invoice_status.keys()), y=list(invoice_status.values()),
@@ -327,7 +336,7 @@ def create_work_orders_visualizations(data_dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("📊 Work Orders by Sector")
+        st.markdown("#### <i class='si si-googlecharts'></i> Work Orders by Sector", unsafe_allow_html=True)
         sector_data = summary.get('by_sector', {})
         if sector_data:
             sectors = list(sector_data.keys())
@@ -339,7 +348,7 @@ def create_work_orders_visualizations(data_dict):
             st.info("Sector data not available")
     
     with col2:
-        st.subheader("📋 Sample Work Orders")
+        st.markdown("#### <i class='si si-databricks'></i> Sample Work Orders", unsafe_allow_html=True)
         if wo_list:
             wo_df = pd.DataFrame(wo_list)
             # Show relevant columns if they exist
@@ -353,7 +362,7 @@ def create_work_orders_visualizations(data_dict):
             st.info("No sample work orders available")
     
     # AR Priority Accounts from summary
-    st.subheader("⚠️ AR Priority Accounts")
+    st.markdown("#### <i class='si si-alert'></i> AR Priority Accounts", unsafe_allow_html=True)
     ar_accounts = summary.get('ar_priority_accounts', [])
     if ar_accounts:
         ar_df = pd.DataFrame(ar_accounts)
@@ -411,7 +420,7 @@ if user_input:
         st.markdown(user_input)
 
     with st.chat_message("assistant"):
-        with st.spinner("🔄 Fetching live data from Monday.com..."):
+        with st.spinner("⏳ Fetching live data from Monday.com..."):
             result = run_query(
                 agent_executor=agent_executor,
                 user_input=user_input,
@@ -428,7 +437,7 @@ if user_input:
         question_type = detect_question_type(user_input)
         
         if question_type in ['deals', 'both']:
-            st.subheader("📊 Deals Analytics Dashboard")
+            st.markdown("## <i class='si si-chartdotjs'></i> Deals Analytics Dashboard", unsafe_allow_html=True)
             try:
                 deals_data = get_deals_data.invoke({"query": user_input})
                 if deals_data and isinstance(deals_data, str):
@@ -444,7 +453,7 @@ if user_input:
                 st.error(f"Error creating deals visualizations: {str(e)}")
         
         if question_type in ['work_orders', 'both']:
-            st.subheader("🔧 Work Orders Analytics Dashboard")
+            st.markdown("## <i class='si si-wrenandrail'></i> Work Orders Analytics Dashboard", unsafe_allow_html=True)
             try:
                 wo_data = get_work_orders_data.invoke({"query": user_input})
                 if wo_data and isinstance(wo_data, str):
