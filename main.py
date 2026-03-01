@@ -135,7 +135,6 @@ with st.sidebar:
 
 st.markdown("# Monday.com Business Intelligence Agent")
 st.caption(
-    "Ask founder-level business questions. "
     "Every response fetches live data from Monday.com. "
     "Visualizations are automatically generated based on your query type."
 )
@@ -373,10 +372,12 @@ for i, msg in enumerate(st.session_state.messages):
         if msg["role"] == "assistant" and i // 2 < len(st.session_state.traces):
             traces = st.session_state.traces[i // 2]
             if traces:
-                with st.expander(f"Agent Actions ({len(traces)} API call(s))", expanded=False):
+                with st.expander(f"🔧 Agent Actions ({len(traces)} API call(s))", expanded=False):
+                    st.caption("Live Monday.com API calls made to answer your question:")
                     for j, trace in enumerate(traces):
                         st.markdown(f"**Step {j+1} — Tool called:** `{trace['tool_name']}`")
-                        st.markdown(f"**Input:** {trace['tool_input']}")
+                        st.markdown(f"**Query Parameters:** {trace['tool_input']}")
+                        st.markdown("**API Response Preview:**")
                         st.code(trace["tool_output_preview"], language="json")
                         if j < len(traces) - 1:
                             st.divider()
@@ -464,13 +465,18 @@ if user_input:
 
         # Display tool call traces
         if traces:
-            with st.expander(f"Agent Actions ({len(traces)} API call(s))", expanded=False):
+            with st.expander(f"🔧 Agent Actions ({len(traces)} API call(s))", expanded=False):
+                st.caption("Live Monday.com API calls made to answer your question:")
                 for j, trace in enumerate(traces):
                     st.markdown(f"**Step {j+1} — Tool called:** `{trace['tool_name']}`")
-                    st.markdown(f"**Input:** {trace['tool_input']}")
+                    st.markdown(f"**Query Parameters:** {trace['tool_input']}")
+                    st.markdown("**API Response Preview:**")
                     st.code(trace["tool_output_preview"], language="json")
                     if j < len(traces) - 1:
                         st.divider()
+        else:
+            # Debug: Show when no traces are captured
+            st.info("ℹ️ No tool traces captured (agent response was generated without API calls)")
 
         # Show error banner if agent hit an error
         if result["error"]:

@@ -105,9 +105,12 @@ def run_query(agent_executor, user_input: str, chat_history: list) -> dict:
         # Extract tool calls and results from messages for visualization reuse
         tool_results = extract_tool_results_from_messages(result.get("messages", []))
         
+        # Extract intermediate steps for trace display
+        intermediate_steps = extract_intermediate_steps_from_messages(result.get("messages", []))
+        
         return {
             "output": output,
-            "intermediate_steps": [],
+            "intermediate_steps": intermediate_steps,
             "tool_results": tool_results,  # Add tool results for reuse
             "error": None
         }
@@ -139,9 +142,12 @@ def run_query(agent_executor, user_input: str, chat_history: list) -> dict:
                 # Extract tool calls and results from fallback messages
                 tool_results = extract_tool_results_from_messages(result.get("messages", []))
                 
+                # Extract intermediate steps for trace display
+                intermediate_steps = extract_intermediate_steps_from_messages(result.get("messages", []))
+                
                 return {
                     "output": output + fallback_notice,
-                    "intermediate_steps": [],
+                    "intermediate_steps": intermediate_steps,
                     "tool_results": tool_results,
                     "error": None,
                     "fallback_used": True
@@ -189,6 +195,40 @@ def extract_tool_results_from_messages(messages: list) -> dict:
                             break
     
     return tool_results
+
+
+def extract_intermediate_steps_from_messages(messages: list) -> list:
+    """Extract intermediate steps from LangGraph messages for trace display."""
+    intermediate_steps = []
+    
+    for i, message in enumerate(messages):
+        # Check for AI messages with tool calls
+        if hasattr(message, 'tool_calls') and message.tool_calls:
+            for tool_call in message.tool_calls:
+                # Create a mock action object
+                class MockAction:
+                    def __init__(self, tool_name, tool_input):
+                        self.tool = tool_name
+                        self.tool_input = tool_input
+                
+                tool_name = tool_call.get('name', '')
+                tool_input = tool_call.get('args', {})
+                
+                # Find the corresponding tool message with the result
+                tool_call_id = tool_call.get('id')
+                output = "Tool result not found"
+                
+                for msg in messages[i+1:]:  # Look at messages after the tool call
+                    if (hasattr(msg, 'tool_call_id') and 
+                        msg.tool_call_id == tool_call_id and
+                        hasattr(msg, 'content')):
+                        output = msg.content
+                        break
+                
+                action = MockAction(tool_name, tool_input)
+                intermediate_steps.append((action, output))
+    
+    return intermediate_steps
 
 def format_tool_traces(intermediate_steps: list) -> list:
     traces = []
