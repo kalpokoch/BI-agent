@@ -31,18 +31,8 @@ logger.info("[APP] Streamlit app starting...")
 
 st.set_page_config(
     page_title="Monday.com BI Agent",
-    page_icon="📊",
     layout="wide"
 )
-
-# Add SimpleIcons CSS
-st.markdown("""
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons.css">
-<style>
-    .si { width: 1em; height: 1em; vertical-align: -0.125em; }
-    .metric-icon { display: inline-block; margin-right: 8px; }
-</style>
-""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # STARTUP VALIDATION
@@ -61,10 +51,10 @@ def init_agent():
 try:
     agent_executor = init_agent()
 except EnvironmentError as e:
-    st.error(f"⚠️ Configuration Error: {str(e)}")
+    st.error(f"Configuration Error: {str(e)}")
     st.stop()
 except Exception as e:
-    st.error(f"⚠️ Failed to initialize agent: {str(e)}")
+    st.error(f"Failed to initialize agent: {str(e)}")
     st.stop()
 
 
@@ -84,12 +74,12 @@ if "traces" not in st.session_state:
 # ─────────────────────────────────────────────
 
 with st.sidebar:
-    st.markdown("### <i class='si si-chartdotjs'></i> BI Agent", unsafe_allow_html=True)
+    st.markdown("### BI Agent")
     st.caption("Powered by Monday.com + Groq AI")
     st.divider()
 
-    st.markdown("### <i class='si si-lightbulb'></i> Sample Questions", unsafe_allow_html=True)
-    st.markdown("**🔵 Deals Questions (Auto-generates dashboards):**")
+    st.markdown("### Sample Questions")
+    st.markdown("**Deals Questions**")
     deals_questions = [
         "How is our pipeline looking this quarter?",
         "What is the total revenue from Mining sector?", 
@@ -101,7 +91,7 @@ with st.sidebar:
         if st.button(q, use_container_width=True, key=q):
             st.session_state.prefill = q
     
-    st.markdown("**🟠 Work Orders Questions (Auto-generates dashboards):**")
+    st.markdown("**Work Orders Questions**")
     wo_questions = [
         "How many work orders are completed vs ongoing?",
         "What is our total amount receivable?",
@@ -113,7 +103,7 @@ with st.sidebar:
         if st.button(q, use_container_width=True, key=q):
             st.session_state.prefill = q
     
-    st.markdown("**🟢 Cross-Board Questions (Full dashboards):**")
+    st.markdown("**Cross-Board Questions (Full dashboards):**")
     cross_questions = [
         "Give me a business health summary",
         "Show me complete operational overview",
@@ -123,13 +113,13 @@ with st.sidebar:
             st.session_state.prefill = q
 
     st.divider()
-    if st.button("🗑️ Clear Chat", use_container_width=True):
+    if st.button("Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.session_state.traces = []
         st.rerun()
 
     st.divider()
-    st.markdown("### <i class='si si-googlecharts'></i> Auto-Generated Visualizations", unsafe_allow_html=True)
+    st.markdown("### Auto-Generated Visualizations")
     st.caption("• **Deals**: Metrics, Status Charts, Sector Analysis, Funnel, Top Deals")
     st.caption("• **Work Orders**: Metrics, Execution Status, Invoice Analysis, AR Priority")
     st.caption("• **Cross-Board**: Complete analytics dashboard")
@@ -143,7 +133,7 @@ with st.sidebar:
 # HEADER
 # ─────────────────────────────────────────────
 
-st.markdown("# <i class='si si-monday'></i> Monday.com Business Intelligence Agent", unsafe_allow_html=True)
+st.markdown("# Monday.com Business Intelligence Agent")
 st.caption(
     "Ask founder-level business questions. "
     "Every response fetches live data from Monday.com. "
@@ -193,13 +183,13 @@ def create_deals_visualizations(data_dict):
     win_rate = (won_deals / total_deals * 100) if total_deals > 0 else 0
     
     with col1:
-        st.metric("📊 Total Deals", total_deals)
+        st.metric("Total Deals", total_deals)
     with col2:
-        st.metric("🔓 Open Deals", open_deals)
+        st.metric("Open Deals", open_deals)
     with col3:
-        st.metric("🏆 Won Deals", won_deals)
+        st.metric("Won Deals", won_deals)
     with col4:
-        st.metric("📈 Win Rate", f"{win_rate:.1f}%")
+        st.metric("Win Rate", f"{win_rate:.1f}%")
     
     st.divider()
     
@@ -207,7 +197,7 @@ def create_deals_visualizations(data_dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### <i class='si si-chartdotjs'></i> Deal Status Distribution", unsafe_allow_html=True)
+        st.markdown("#### Deal Status Distribution")
         if status_counts:
             fig = px.pie(values=list(status_counts.values()), names=list(status_counts.keys()),
                         hole=0.4, title="Deal Status")
@@ -217,7 +207,7 @@ def create_deals_visualizations(data_dict):
             st.info("Status data not available")
     
     with col2:
-        st.markdown("#### <i class='si si-googlecharts'></i> Deals by Sector", unsafe_allow_html=True)
+        st.markdown("#### Deals by Sector")
         sector_data = summary.get('by_sector', {})
         if sector_data:
             sectors = list(sector_data.keys())
@@ -232,7 +222,7 @@ def create_deals_visualizations(data_dict):
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.markdown("#### <i class='si si-funnel'></i> Deal Stage Funnel", unsafe_allow_html=True)
+        st.markdown("#### Deal Stage Funnel")
         stage_data = summary.get('by_stage', {})
         if stage_data:
             stages = list(stage_data.keys())
@@ -248,7 +238,7 @@ def create_deals_visualizations(data_dict):
             st.info("Stage data not available")
     
     with col2:
-        st.markdown("#### <i class='si si-databricks'></i> Sample Deals", unsafe_allow_html=True)
+        st.markdown("#### Sample Deals")
         if deals_list:
             # Create DataFrame from sample deals
             deals_df = pd.DataFrame(deals_list)
@@ -298,13 +288,13 @@ def create_work_orders_visualizations(data_dict):
     receivable = extract_amount(financials.get('total_amount_receivable', '₹0'))
     
     with col1:
-        st.metric("📋 Total Work Orders", total_wos)
+        st.metric("Total Work Orders", total_wos)
     with col2:
-        st.metric("💰 Contract Value", financials.get('total_contract_value_incl_gst', '₹0'))
+        st.metric("Contract Value", financials.get('total_contract_value_incl_gst', '₹0'))
     with col3:
-        st.metric("✅ Collected", financials.get('total_collected_incl_gst', '₹0'))
+        st.metric("Collected", financials.get('total_collected_incl_gst', '₹0'))
     with col4:
-        st.metric("⏳ Receivable", financials.get('total_amount_receivable', '₹0'))
+        st.metric("Receivable", financials.get('total_amount_receivable', '₹0'))
     
     st.divider()
     
@@ -312,7 +302,7 @@ def create_work_orders_visualizations(data_dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### <i class='si si-chartdotjs'></i> Execution Status", unsafe_allow_html=True)
+        st.markdown("#### Execution Status")
         exec_status = summary.get('by_execution_status', {})
         if exec_status:
             fig = px.pie(values=list(exec_status.values()), names=list(exec_status.keys()),
@@ -323,7 +313,7 @@ def create_work_orders_visualizations(data_dict):
             st.info("Execution status data not available")
     
     with col2:
-        st.markdown("#### <i class='si si-googlecharts'></i> Invoice Status", unsafe_allow_html=True)
+        st.markdown("#### Invoice Status")
         invoice_status = summary.get('by_invoice_status', {})
         if invoice_status:
             fig = px.bar(x=list(invoice_status.keys()), y=list(invoice_status.values()),
@@ -336,7 +326,7 @@ def create_work_orders_visualizations(data_dict):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### <i class='si si-googlecharts'></i> Work Orders by Sector", unsafe_allow_html=True)
+        st.markdown("#### Work Orders by Sector")
         sector_data = summary.get('by_sector', {})
         if sector_data:
             sectors = list(sector_data.keys())
@@ -348,7 +338,7 @@ def create_work_orders_visualizations(data_dict):
             st.info("Sector data not available")
     
     with col2:
-        st.markdown("#### <i class='si si-databricks'></i> Sample Work Orders", unsafe_allow_html=True)
+        st.markdown("#### Sample Work Orders")
         if wo_list:
             wo_df = pd.DataFrame(wo_list)
             # Show relevant columns if they exist
@@ -362,7 +352,7 @@ def create_work_orders_visualizations(data_dict):
             st.info("No sample work orders available")
     
     # AR Priority Accounts from summary
-    st.markdown("#### <i class='si si-alert'></i> AR Priority Accounts", unsafe_allow_html=True)
+    st.markdown("#### AR Priority Accounts")
     ar_accounts = summary.get('ar_priority_accounts', [])
     if ar_accounts:
         ar_df = pd.DataFrame(ar_accounts)
@@ -383,7 +373,7 @@ for i, msg in enumerate(st.session_state.messages):
         if msg["role"] == "assistant" and i // 2 < len(st.session_state.traces):
             traces = st.session_state.traces[i // 2]
             if traces:
-                with st.expander(f"🔍 Agent Actions ({len(traces)} API call(s))", expanded=False):
+                with st.expander(f"Agent Actions ({len(traces)} API call(s))", expanded=False):
                     for j, trace in enumerate(traces):
                         st.markdown(f"**Step {j+1} — Tool called:** `{trace['tool_name']}`")
                         st.markdown(f"**Input:** {trace['tool_input']}")
@@ -420,7 +410,7 @@ if user_input:
         st.markdown(user_input)
 
     with st.chat_message("assistant"):
-        with st.spinner("⏳ Fetching live data from Monday.com..."):
+        with st.spinner("Fetching live data from Monday.com..."):
             result = run_query(
                 agent_executor=agent_executor,
                 user_input=user_input,
@@ -439,7 +429,7 @@ if user_input:
         tool_results = result.get('tool_results', {})
         
         if question_type in ['deals', 'both']:
-            st.markdown("## <i class='si si-chartdotjs'></i> Deals Analytics Dashboard", unsafe_allow_html=True)
+            st.markdown("## Deals Analytics Dashboard")
             try:
                 # Reuse data from agent execution instead of calling tool again
                 deals_data = tool_results.get('get_deals_data')
@@ -456,7 +446,7 @@ if user_input:
                 st.error(f"Error creating deals visualizations: {str(e)}")
         
         if question_type in ['work_orders', 'both']:
-            st.markdown("## <i class='si si-wrenandrail'></i> Work Orders Analytics Dashboard", unsafe_allow_html=True)
+            st.markdown("## Work Orders Analytics Dashboard")
             try:
                 # Reuse data from agent execution instead of calling tool again
                 wo_data = tool_results.get('get_work_orders_data')
@@ -474,7 +464,7 @@ if user_input:
 
         # Display tool call traces
         if traces:
-            with st.expander(f"🔍 Agent Actions ({len(traces)} API call(s))", expanded=False):
+            with st.expander(f"Agent Actions ({len(traces)} API call(s))", expanded=False):
                 for j, trace in enumerate(traces):
                     st.markdown(f"**Step {j+1} — Tool called:** `{trace['tool_name']}`")
                     st.markdown(f"**Input:** {trace['tool_input']}")
@@ -484,7 +474,7 @@ if user_input:
 
         # Show error banner if agent hit an error
         if result["error"]:
-            st.warning(f"⚠️ {result['error']}")
+            st.warning(f"Warning: {result['error']}")
 
     # Save to session state
     st.session_state.messages.append({"role": "assistant", "content": response})
