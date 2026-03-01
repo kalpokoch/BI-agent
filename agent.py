@@ -102,9 +102,13 @@ def run_query(agent_executor, user_input: str, chat_history: list) -> dict:
         final_message = result.get("messages", [])[-1] if result.get("messages") else None
         output = final_message.content if final_message else "I could not generate a response."
         
+        # Extract tool calls and results from messages for visualization reuse
+        tool_results = extract_tool_results_from_messages(result.get("messages", []))
+        
         return {
             "output": output,
             "intermediate_steps": [],
+            "tool_results": tool_results,  # Add tool results for reuse
             "error": None
         }
     except Exception as e:
@@ -132,9 +136,13 @@ def run_query(agent_executor, user_input: str, chat_history: list) -> dict:
                 # Add fallback notification to response
                 fallback_notice = "\n\n⚡ *Note: Switched to faster model due to rate limits on primary model.*"
                 
+                # Extract tool calls and results from fallback messages
+                tool_results = extract_tool_results_from_messages(result.get("messages", []))
+                
                 return {
                     "output": output + fallback_notice,
                     "intermediate_steps": [],
+                    "tool_results": tool_results,
                     "error": None,
                     "fallback_used": True
                 }
@@ -143,6 +151,7 @@ def run_query(agent_executor, user_input: str, chat_history: list) -> dict:
                 return {
                     "output": f"⚠️ Both primary and fallback models unavailable. Please try again later. Error: {str(fallback_error)}",
                     "intermediate_steps": [],
+                    "tool_results": {},
                     "error": str(fallback_error)
                 }
         
@@ -151,6 +160,7 @@ def run_query(agent_executor, user_input: str, chat_history: list) -> dict:
         return {
             "output": f"Warning: {friendly}",
             "intermediate_steps": [],
+            "tool_results": {},
             "error": error_msg
         }
 
@@ -158,6 +168,27 @@ def run_query(agent_executor, user_input: str, chat_history: list) -> dict:
 # ─────────────────────────────────────────────
 # TOOL TRACE FORMATTER
 # ─────────────────────────────────────────────
+
+def extract_tool_results_from_messages(messages: list) -> dict:
+    """Extract tool call results from LangGraph agent messages for reuse."""
+    tool_results = {}
+    
+    for message in messages:
+        # Check for AI messages with tool calls
+        if hasattr(message, 'tool_calls') and message.tool_calls:
+            for tool_call in message.tool_calls:
+                tool_name = tool_call.get('name', '')
+                if tool_name in ['get_deals_data', 'get_work_orders_data']:
+                    # Find the corresponding tool message with the result
+                    tool_call_id = tool_call.get('id')
+                    for msg in messages:
+                        if (hasattr(msg, 'tool_call_id') and 
+                            msg.tool_call_id == tool_call_id and
+                            hasattr(msg, 'content')):
+                            tool_results[tool_name] = msg.content
+                            break
+    
+    return tool_results
 
 def format_tool_traces(intermediate_steps: list) -> list:
     traces = []

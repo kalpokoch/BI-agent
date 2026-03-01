@@ -434,12 +434,15 @@ if user_input:
         st.markdown(response)
         
         # Generate visualizations based on question type and available data
+        # REUSE tool results from agent execution instead of calling tools again!
         question_type = detect_question_type(user_input)
+        tool_results = result.get('tool_results', {})
         
         if question_type in ['deals', 'both']:
             st.markdown("## <i class='si si-chartdotjs'></i> Deals Analytics Dashboard", unsafe_allow_html=True)
             try:
-                deals_data = get_deals_data.invoke({"query": user_input})
+                # Reuse data from agent execution instead of calling tool again
+                deals_data = tool_results.get('get_deals_data')
                 if deals_data and isinstance(deals_data, str):
                     import json
                     deals_dict = json.loads(deals_data)
@@ -447,15 +450,16 @@ if user_input:
                         create_deals_visualizations(deals_dict)
                     else:
                         st.info("No deals data available for visualization")
-                        # Debug: show the actual structure
-                        st.code(f"Debug - Data structure: {list(deals_dict.keys()) if deals_dict else 'None'}", language="json")
+                elif question_type == 'deals':
+                    st.info("Deals data not available - agent may not have called the deals tool")
             except Exception as e:
                 st.error(f"Error creating deals visualizations: {str(e)}")
         
         if question_type in ['work_orders', 'both']:
             st.markdown("## <i class='si si-wrenandrail'></i> Work Orders Analytics Dashboard", unsafe_allow_html=True)
             try:
-                wo_data = get_work_orders_data.invoke({"query": user_input})
+                # Reuse data from agent execution instead of calling tool again
+                wo_data = tool_results.get('get_work_orders_data')
                 if wo_data and isinstance(wo_data, str):
                     import json
                     wo_dict = json.loads(wo_data)
@@ -463,8 +467,8 @@ if user_input:
                         create_work_orders_visualizations(wo_dict)
                     else:
                         st.info("No work orders data available for visualization")
-                        # Debug: show the actual structure
-                        st.code(f"Debug - Data structure: {list(wo_dict.keys()) if wo_dict else 'None'}", language="json")
+                elif question_type == 'work_orders':
+                    st.info("Work orders data not available - agent may not have called the work orders tool")
             except Exception as e:
                 st.error(f"Error creating work orders visualizations: {str(e)}")
 
